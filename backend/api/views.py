@@ -60,10 +60,32 @@ def pesquisador_detail(request, id):
         serializer = PesquisadorProfileSerializer(perfil, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+
+        # Atualizar dados do User (nome e email) se enviados, pois no serializer eles são read-only
+        user = perfil.user
+        user_updated = False
+        if 'name' in request.data:
+            name = request.data.get('name')
+            partes = name.split(' ', 1)
+            user.first_name = partes[0]
+            user.last_name = partes[1] if len(partes) > 1 else ''
+            user_updated = True
+        
+        if 'email' in request.data:
+            # O ideal é validar se o e-mail não existe em outro usuário,
+            # mas simplificando para o escopo atual:
+            user.email = request.data.get('email')
+            user.username = request.data.get('email')
+            user_updated = True
+            
+        if user_updated:
+            user.save()
+
+        # Retornamos o serializer com os dados atualizados
+        return Response(PesquisadorProfileSerializer(perfil).data)
 
     perfil.user.delete()  # deleta User e Profile em cascata
-    return Response({"mensagem": "Pesquisador removido com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # -------------------------------------------------------
@@ -99,7 +121,7 @@ def projeto_detail(request, id):
         return Response(serializer.data)
 
     projeto.delete()
-    return Response({"mensagem": "Projeto removido com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # -------------------------------------------------------
@@ -135,4 +157,4 @@ def artigo_detail(request, id):
         return Response(serializer.data)
 
     artigo.delete()
-    return Response({"mensagem": "Artigo removido com sucesso."}, status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_204_NO_CONTENT)

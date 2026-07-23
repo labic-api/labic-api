@@ -148,6 +148,58 @@ POST /auth/refresh/
 | PUT | `/artigos/<id>/` | Sim (admin) | Editar artigo |
 | DELETE | `/artigos/<id>/` | Sim (admin) | Deletar artigo |
 
+## Formato dos Dados (JSON) para criação e edição (POST / PUT)
+
+Para facilitar a integração do Front-end, abaixo estão os formatos esperados no corpo (`body`) das requisições. 
+
+> **Atenção sobre as rotas PUT:** A API está configurada para atualização parcial (`partial=True`). Isso significa que, na edição, você não precisa enviar o objeto inteiro, basta enviar **apenas** os campos que deseja alterar.
+
+### 1. Pesquisadores (`/pesquisadores/`)
+**POST (Criação):**
+```json
+{
+  "name": "João da Silva",        // Obrigatório
+  "email": "joao@email.com",      // Obrigatório e único
+  "password": "senha123",         // Opcional (Padrão: "Labic@2026!")
+  "area": "Inteligência Artificial", // Opcional
+  "link": "http://lattes.cnpq.br/12345", // Opcional (URL do lattes)
+  "bio": "Pesquisador sênior...", // Opcional
+  "nivel_acesso": "membro"        // Opcional ("membro", "coordenador", "admin")
+}
+```
+**PUT (Edição):** 
+```json
+{
+  "name": "João da Silva Atualizado",
+  "email": "joao_novo@email.com",
+  "area": "Nova Área",
+  "link": "http://lattes.cnpq.br/00000",
+  "bio": "Nova bio atualizada..."
+}
+```
+
+### 2. Projetos (`/projetos/`)
+**POST / PUT:**
+```json
+{
+  "title": "Nome do Projeto",    // Obrigatório no POST
+  "status": "Em Planejamento",   // Opcional ("Em Planejamento", "Ativo", "Em Execução", "Concluído", "Pausado")
+  "startDate": "2026-07-23",     // Opcional (AAAA-MM-DD ou "")
+  "endDate": "2027-07-23"        // Opcional (AAAA-MM-DD ou "")
+}
+```
+
+### 3. Artigos (`/artigos/`)
+**POST / PUT:**
+```json
+{
+  "title": "Título do Artigo",   // Obrigatório no POST
+  "authors": "A. Silva, B. Costa", // Opcional
+  "status": "Ativo",             // Opcional ("Ativo", "Em Execução", "Concluído")
+  "relatedArea": "Redes Neurais" // Opcional
+}
+```
+
 ---
 
 🚧 **Status do Projeto: Em Desenvolvimento** 🚧
