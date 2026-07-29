@@ -45,8 +45,8 @@ export default function ResearchersList() {
   };
 
   const filteredResearchers = researchers.filter(r =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.area.toLowerCase().includes(searchTerm.toLowerCase())
+    (r.name ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (r.area ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

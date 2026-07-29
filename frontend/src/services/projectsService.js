@@ -1,37 +1,57 @@
 // src/services/projectsService.js
-import { delay } from './api';
+
+import { apiFetch } from './api'
+
+/**
+ * Extrai a mensagem de erro do corpo da resposta da API ou usa um fallback.
+ * O DRF normalmente retorna { detail: "..." } ou { campo: ["erro"] }.
+ */
+async function parseError(response, fallback) {
+  try {
+    const body = await response.json()
+    const message =
+      body?.detail ||
+      Object.values(body).flat().join(' ') ||
+      fallback
+    return new Error(message)
+  } catch {
+    return new Error(fallback)
+  }
+}
 
 export const projectsService = {
+  /** GET /projetos/ — Lista todos os projetos */
   getAll: async () => {
-    await delay();
-    const data = localStorage.getItem('labic_projects');
-    if (!data) {
-      const initialProjects = [
-        { id: '1', title: 'Deep Learning Model', status: 'Ativo', startDate: '2022-03-10', endDate: '' },
-        { id: '2', title: 'Smart 3D Printer Controller', status: 'Em Execução', startDate: '2023-05-15', endDate: '' },
-        { id: '3', title: 'Community Drone Mapping', status: 'Ativo', startDate: '2024-01-20', endDate: '' }
-      ];
-      localStorage.setItem('labic_projects', JSON.stringify(initialProjects));
-      return initialProjects;
+    const response = await apiFetch('/projetos/')
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar projetos.')
     }
-    return JSON.parse(data);
+    return response.json()
   },
 
-  create: async (projectData) => {
-    await delay();
-    const data = localStorage.getItem('labic_projects');
-    const projects = data ? JSON.parse(data) : [];
+  /**
+   * POST /projetos/ — Cria um novo projeto.
+   * Campos esperados: title, status (opcional), startDate (opcional), endDate (opcional)
+   */
+  create: async (data) => {
+    const response = await apiFetch('/projetos/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao criar projeto.')
+    }
+    return response.json()
+  },
 
-    const newProject = {
-      id: String(Date.now()),
-      title: projectData.title,
-      status: projectData.status || 'Em Planejamento',
-      startDate: projectData.startDate,
-      endDate: projectData.endDate || ''
-    };
-
-    projects.unshift(newProject);
-    localStorage.setItem('labic_projects', JSON.stringify(projects));
-    return newProject;
-  }
-};
+  /** DELETE /projetos/{id}/ — Remove um projeto pelo ID */
+  delete: async (id) => {
+    const response = await apiFetch(`/projetos/${id}/`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao remover projeto.')
+    }
+    return true
+  },
+}

@@ -1,43 +1,58 @@
 // src/services/researchersService.js
-import { delay } from './api';
+
+import { apiFetch } from './api'
+
+/**
+ * Extrai a mensagem de erro do corpo da resposta da API ou usa um fallback.
+ * O DRF normalmente retorna { detail: "..." } ou { campo: ["erro"] }.
+ */
+async function parseError(response, fallback) {
+  try {
+    const body = await response.json()
+    const message =
+      body?.detail ||
+      Object.values(body).flat().join(' ') ||
+      fallback
+    return new Error(message)
+  } catch {
+    return new Error(fallback)
+  }
+}
 
 export const researchersService = {
-  // GET: Retorna os pesquisadores ativos
+  /** GET /pesquisadores/ — Lista todos os pesquisadores */
   getAll: async () => {
-    await delay();
-    const data = localStorage.getItem('labic_researchers');
-    return data ? JSON.parse(data) : [];
-  },
-
-  // POST: Cadastra um novo pesquisador
-  create: async (researcherData) => {
-    await delay();
-    const data = localStorage.getItem('labic_researchers');
-    const researchers = data ? JSON.parse(data) : [];
-
-    const newResearcher = {
-      id: String(Date.now()),
-      name: researcherData.name,
-      email: researcherData.email,
-      area: researcherData.area,
-      bio: researcherData.bio,
-      link: researcherData.link || ''
-    };
-
-    researchers.unshift(newResearcher);
-    localStorage.setItem('labic_researchers', JSON.stringify(researchers));
-    return newResearcher;
-  },
-
-  // DELETE: Remove um pesquisador da equipe
-  delete: async (id) => {
-    await delay();
-    const data = localStorage.getItem('labic_researchers');
-    if (data) {
-      const researchers = JSON.parse(data);
-      const filtered = researchers.filter(res => res.id !== id);
-      localStorage.setItem('labic_researchers', JSON.stringify(filtered));
+    const response = await apiFetch('/pesquisadores/')
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar pesquisadores.')
     }
-    return true;
-  }
-};
+    return response.json()
+  },
+
+  /**
+   * POST /pesquisadores/ — Cadastra um novo pesquisador.
+   * Campos esperados: name, email, area, link, bio, password (opcional), nivel_acesso (opcional)
+   */
+  create: async (data) => {
+    const response = await apiFetch('/pesquisadores/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao cadastrar pesquisador.')
+    }
+    return response.json()
+  },
+
+  /** DELETE /pesquisadores/{id}/ — Remove um pesquisador pelo ID */
+  delete: async (id) => {
+    const response = await apiFetch(`/pesquisadores/${id}/`, {
+      method: 'DELETE',
+    })
+    // 204 No Content é sucesso sem corpo
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao remover pesquisador.')
+    }
+    return true
+  },
+}

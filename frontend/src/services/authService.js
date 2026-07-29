@@ -1,70 +1,77 @@
 // src/services/authService.js
 
-const USERS_KEY = 'labic_users';
-const SESSION_KEY = 'labic_session';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
-// 1. O "Seed": Injeta o Super Admin se o sistema estiver virgem (Dia 1)
-const initializeDatabase = () => {
-  const existingUsers = localStorage.getItem(USERS_KEY);
-  if (!existingUsers) {
-    const superAdmin = [
-      {
-        id: 1,
-        name: 'Coordenação LABIC',
-        email: 'coordenacao@labic.edu',
-        password: 'Labic@Admin2026!', // Senha robusta e menos previsível
-        role: 'SUPER_ADMIN'
-      }
-    ];
-    localStorage.setItem(USERS_KEY, JSON.stringify(superAdmin));
-  }
-};
-
-// Roda a inicialização assim que o serviço é importado
-initializeDatabase();
-
-// Simulador de delay de rede
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const ACCESS_KEY  = 'labic_access_token'
+const REFRESH_KEY = 'labic_refresh_token'
 
 export const authService = {
+  /**
+   * Autentica o usuário na API.
+   * POST {API_BASE_URL}/auth/login/ → { access, refresh }
+   * Salva os tokens no localStorage em caso de sucesso.
+   * Lança Error com mensagem amigável em caso de 400 / 401.
+   */
   login: async (email, password) => {
-    await delay(1000); // Finge que está indo na internet
+    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
 
-    const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-    
-    // Procura o usuário no banco local
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (!user) {
-      throw new Error('Endereço de e-mail ou senha inválidos.');
+    if (!response.ok) {
+      // 400 (bad request) ou 401 (credenciais erradas)
+      throw new Error('Credenciais inválidas. Verifique o email e a senha.')
     }
 
-    // Cria a sessão removendo a senha por segurança (Corrigido para evitar erro de variável não usada no ESLint)
-    const userData = { ...user };
-    delete userData.password;
-    
-    const sessionToken = `mock-jwt-token-${userData.id}-${Date.now()}`;
-    
-    const session = {
-      user: userData,
-      token: sessionToken
-    };
+    const { access, refresh } = await response.json()
 
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    return session;
+    localStorage.setItem(ACCESS_KEY, access)
+    localStorage.setItem(REFRESH_KEY, refresh)
+
+    return { access, refresh }
   },
 
-  logout: async () => {
-    await delay(500);
-    localStorage.removeItem(SESSION_KEY);
+  /**
+   * Encerra a sessão limpando os tokens do localStorage.
+   */
+  logout: () => {
+    localStorage.removeItem(ACCESS_KEY)
+    localStorage.removeItem(REFRESH_KEY)
   },
 
-  getCurrentUser: () => {
-    const session = localStorage.getItem(SESSION_KEY);
-    return session ? JSON.parse(session).user : null;
-  },
-
+  /**
+   * Retorna true se houver um access token salvo.
+   */
   isAuthenticated: () => {
-    return !!localStorage.getItem(SESSION_KEY);
-  }
-};
+    return Boolean(localStorage.getItem(ACCESS_KEY))
+  },
+
+  /**
+   * Retorna o access token atual ou null.
+   */
+  getToken: () => {
+    return localStorage.getItem(ACCESS_KEY)
+  },
+
+  /**
+   * Decodifica o payload do JWT e retorna os dados do usuário logado.
+   * O SimpleJWT inclui os campos padrão; o nome é montado a partir de
+   * first_name + last_name quando disponíveis, com fallback para username.
+   * Retorna null se não houver token.
+   */
+  getCurrentUser: () => {
+    const token = localStorage.getItem(ACCESS_KEY)
+    if (!token) return null
+    try {
+      // O payload JWT é a segunda parte separada por '.'
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const name = [payload.first_name, payload.last_name]
+        .filter(Boolean)
+        .join(' ') || payload.username || payload.email || 'Usuário'
+      return { name, email: payload.email ?? payload.username ?? '' }
+    } catch {
+      return null
+    }
+  },
+}

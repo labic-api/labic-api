@@ -41,6 +41,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # serving de estáticos em produção
     'corsheaders.middleware.CorsMiddleware',  # deve vir antes do CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -94,9 +95,15 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS — livre para desenvolvimento (M2)
-# Em produção (M3), trocar por:
-# CORS_ALLOWED_ORIGINS = ['https://seu-frontend.vercel.app']
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS — origens permitidas lidas de variável de ambiente.
+# Em desenvolvimento o fallback é http://localhost:5173 (Vite).
+# Em produção, defina CORS_ALLOWED_ORIGINS no .env com todas as origens
+# permitidas separadas por vírgula, por exemplo:
+#   CORS_ALLOWED_ORIGINS=https://seu-frontend.vercel.app,https://labic.edu.br
+_raw_cors = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173')
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _raw_cors.split(',') if origin.strip()]

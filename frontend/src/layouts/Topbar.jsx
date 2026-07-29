@@ -1,20 +1,43 @@
+import { useNavigate } from 'react-router-dom'
+import { authService } from '../services/authService'
 
 export default function Topbar() {
+  const navigate = useNavigate()
+  const user = authService.getCurrentUser()
+
+  // Gera as iniciais do nome para o avatar (ex: "João Silva" → "JS")
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join('')
+    : '?'
+
+  const handleLogout = () => {
+    authService.logout()
+    navigate('/login')
+  }
+
   return (
     <header style={styles.topbar}>
       <div style={styles.profileContainer}>
+        {/* Avatar com iniciais — sem foto fake */}
         <div style={styles.avatar}>
-          <img 
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
-            alt="Avatar" 
-            style={styles.avatarImg} 
-          />
+          <span style={styles.avatarInitials}>{initials}</span>
         </div>
-        <span style={styles.username}>Dr. Carlos Silva</span>
-        <button style={styles.logoutBtn}>Sair</button>
+
+        <span style={styles.username}>
+          {user?.name ?? 'Usuário'}
+        </span>
+
+        <button style={styles.logoutBtn} onClick={handleLogout}>
+          Sair
+        </button>
       </div>
     </header>
-  );
+  )
 }
 
 const styles = {
@@ -34,16 +57,21 @@ const styles = {
     gap: '12px',
   },
   avatar: {
-    width: '32px',
-    height: '32px',
+    width: '36px',
+    height: '36px',
     borderRadius: '50%',
-    overflow: 'hidden',
-    backgroundColor: '#E5E7EB',
+    backgroundColor: 'rgb(43, 93, 250)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
-  avatarImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
+  avatarInitials: {
+    color: '#FFFFFF',
+    fontSize: '13px',
+    fontWeight: '700',
+    fontFamily: 'Inter, sans-serif',
+    letterSpacing: '0.5px',
   },
   username: {
     fontFamily: 'Open Sans, sans-serif',
@@ -61,5 +89,5 @@ const styles = {
     cursor: 'pointer',
     transition: '0.2s ease',
     fontWeight: '600',
-  }
-};
+  },
+}

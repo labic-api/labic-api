@@ -67,7 +67,7 @@ export default function Dashboard() {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
             <ProjectTable data={projects} loading={loading} limit={3} />
-            <ResearchTable limit={3} />
+            <ResearchTable data={researchers} loading={loading} limit={3} />
           </div>
           <ArticleTable data={articles} loading={loading} limit={3} />
         </>

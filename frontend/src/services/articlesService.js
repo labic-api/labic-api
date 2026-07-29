@@ -1,43 +1,57 @@
 // src/services/articlesService.js
-import { delay } from './api';
+
+import { apiFetch } from './api'
+
+/**
+ * Extrai a mensagem de erro do corpo da resposta da API ou usa um fallback.
+ * O DRF normalmente retorna { detail: "..." } ou { campo: ["erro"] }.
+ */
+async function parseError(response, fallback) {
+  try {
+    const body = await response.json()
+    const message =
+      body?.detail ||
+      Object.values(body).flat().join(' ') ||
+      fallback
+    return new Error(message)
+  } catch {
+    return new Error(fallback)
+  }
+}
 
 export const articlesService = {
-  // GET: Lista todos os artigos cadastrados
+  /** GET /artigos/ — Lista todos os artigos */
   getAll: async () => {
-    await delay();
-    const data = localStorage.getItem('labic_articles');
-    return data ? JSON.parse(data) : [];
-  },
-
-  // POST: Adiciona um novo artigo validado ao banco local
-  create: async (articleData) => {
-    await delay();
-    const data = localStorage.getItem('labic_articles');
-    const articles = data ? JSON.parse(data) : [];
-    
-    const newArticle = {
-      id: String(Date.now()),
-      title: articleData.title,
-      authors: Array.isArray(articleData.authors) ? articleData.authors.join(', ') : articleData.authors,
-      date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'Short', year: 'numeric' }).replace('.', ''),
-      status: 'Ativo',
-      relatedArea: articleData.relatedArea
-    };
-
-    articles.unshift(newArticle); // Insere no topo da listagem
-    localStorage.setItem('labic_articles', JSON.stringify(articles));
-    return newArticle;
-  },
-
-  // DELETE: Remove um artigo pelo ID
-  delete: async (id) => {
-    await delay();
-    const data = localStorage.getItem('labic_articles');
-    if (data) {
-      const articles = JSON.parse(data);
-      const filtered = articles.filter(art => art.id !== id);
-      localStorage.setItem('labic_articles', JSON.stringify(filtered));
+    const response = await apiFetch('/artigos/')
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar artigos.')
     }
-    return true;
-  }
-};
+    return response.json()
+  },
+
+  /**
+   * POST /artigos/ — Cadastra um novo artigo.
+   * Campos esperados: title, authors (opcional), status (opcional), relatedArea (opcional)
+   */
+  create: async (data) => {
+    const response = await apiFetch('/artigos/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao cadastrar artigo.')
+    }
+    return response.json()
+  },
+
+  /** DELETE /artigos/{id}/ — Remove um artigo pelo ID */
+  delete: async (id) => {
+    const response = await apiFetch(`/artigos/${id}/`, {
+      method: 'DELETE',
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao remover artigo.')
+    }
+    return true
+  },
+}

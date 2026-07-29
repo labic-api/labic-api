@@ -40,8 +40,8 @@ export default function ArticlesList() {
   };
 
   const filteredArticles = articles.filter(art =>
-    art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    art.authors.toLowerCase().includes(searchTerm.toLowerCase())
+    (art.title ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (art.authors ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
