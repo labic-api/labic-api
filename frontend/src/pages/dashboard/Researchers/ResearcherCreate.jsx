@@ -97,7 +97,7 @@ export default function ResearcherCreate() {
       navigate('/dashboard/pesquisadores');
     } catch (error) {
       console.error("Erro na requisição:", error);
-      setErrors(prev => ({ ...prev, submit: 'Erro ao comunicar com o servidor.' }));
+      setErrors(prev => ({ ...prev, submit: error.message || 'Erro ao comunicar com o servidor.' }));
     } finally {
       setIsSubmitting(false);
     }

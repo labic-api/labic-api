@@ -182,6 +182,9 @@ class ProjetoSerializer(serializers.ModelSerializer):
 class ArtigoSerializer(serializers.ModelSerializer):
     # Mapeamento: campo do front → campo do model
     title = serializers.CharField(source='titulo')
+    abstract = serializers.CharField(source='resumo', required=False, allow_blank=True, default='')
+    methodology = serializers.CharField(source='metodologia', required=False, allow_blank=True, default='')
+    literatureReview = serializers.CharField(source='revisao_bibliografica', required=False, allow_blank=True, default='')
     relatedArea = serializers.CharField(
         source='area_relacionada', required=False,
         allow_blank=True, allow_null=True
@@ -191,7 +194,7 @@ class ArtigoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Artigo
-        fields = ['id', 'title', 'authors', 'date', 'status', 'relatedArea']
+        fields = ['id', 'title', 'abstract', 'methodology', 'literatureReview', 'authors', 'date', 'status', 'relatedArea']
 
     def get_date(self, obj):
         months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',

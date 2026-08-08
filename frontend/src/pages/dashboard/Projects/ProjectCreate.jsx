@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button'
 import Input from '../../../components/ui/Input'
 import Alert from '../../../components/ui/Alert'
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
+import { projectsService } from '../../../services/projectsService'
 
 export default function ProjectCreate() {
   const navigate = useNavigate()
@@ -53,7 +54,7 @@ export default function ProjectCreate() {
     return Object.keys(currentErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!validateForm()) return
@@ -61,15 +62,28 @@ export default function ProjectCreate() {
     setLoading(true)
     setAlert(null)
 
-    // Simula salvamento
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const projectData = {
+        title: formData.titulo, // Mapeamento para o campo title do backend
+        descricao: formData.descricao,
+        responsavel: formData.responsavel,
+        area: formData.area,
+        status: formData.status
+      };
+
+      await projectsService.create(projectData);
+      
       setAlert({ type: 'success', message: 'Projeto cadastrado com sucesso!' })
       setTimeout(() => {
         setAlert(null)
         navigate('/dashboard/projetos')
       }, 2000)
-    }, 1500)
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+      setAlert({ type: 'error', message: error.message || 'Erro ao comunicar com o servidor.' });
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

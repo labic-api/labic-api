@@ -119,7 +119,7 @@ export default function ArticleCreate() {
     try {
       const articleData = {
         ...formData,
-        authors,
+        authors: authors.join(', '), // Envia como string, separada por vírgula
         status: isDraft ? 'Rascunho' : 'Ativo',
         // Em uma API real, aqui você usaria FormData para enviar o pdfFile como multipart/form-data
       };
@@ -128,7 +128,7 @@ export default function ArticleCreate() {
       navigate('/dashboard/artigos');
     } catch (error) {
       console.error("Erro na requisição:", error);
-      setErrors(prev => ({ ...prev, submit: 'Erro ao comunicar com o servidor.' }));
+      setErrors(prev => ({ ...prev, submit: error.message || 'Erro ao comunicar com o servidor.' }));
     } finally {
       setIsSubmitting(false);
     }
