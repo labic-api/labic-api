@@ -99,7 +99,7 @@ export default function ArticlesList() {
                   </td>
                   <td style={styles.tdActions}>
                     <button style={styles.actionBtn} title="Visualizar"><FiEye size={16} color="#4B5563" /></button>
-                    <button style={styles.actionBtn} title="Editar"><FiEdit2 size={16} color="#2B5DFA" /></button>
+                    <button style={styles.actionBtn} title="Editar" onClick={() => navigate(`/dashboard/artigos/editar/${article.id}`)}><FiEdit2 size={16} color="#2B5DFA" /></button>
                     <button 
                       style={styles.actionBtn} 
                       title="Excluir" 

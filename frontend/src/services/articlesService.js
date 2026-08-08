@@ -44,6 +44,27 @@ export const articlesService = {
     return response.json()
   },
 
+  /** GET /artigos/{id}/ — Busca um artigo específico */
+  getById: async (id) => {
+    const response = await apiFetch(`/artigos/${id}/`)
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar o artigo.')
+    }
+    return response.json()
+  },
+
+  /** PUT /artigos/{id}/ — Atualiza um artigo */
+  update: async (id, data) => {
+    const response = await apiFetch(`/artigos/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao atualizar artigo.')
+    }
+    return response.json()
+  },
+
   /** DELETE /artigos/{id}/ — Remove um artigo pelo ID */
   delete: async (id) => {
     const response = await apiFetch(`/artigos/${id}/`, {

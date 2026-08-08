@@ -44,6 +44,27 @@ export const researchersService = {
     return response.json()
   },
 
+  /** GET /pesquisadores/{id}/ — Busca um pesquisador específico */
+  getById: async (id) => {
+    const response = await apiFetch(`/pesquisadores/${id}/`)
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar o pesquisador.')
+    }
+    return response.json()
+  },
+
+  /** PUT /pesquisadores/{id}/ — Atualiza um pesquisador */
+  update: async (id, data) => {
+    const response = await apiFetch(`/pesquisadores/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao atualizar pesquisador.')
+    }
+    return response.json()
+  },
+
   /** DELETE /pesquisadores/{id}/ — Remove um pesquisador pelo ID */
   delete: async (id) => {
     const response = await apiFetch(`/pesquisadores/${id}/`, {

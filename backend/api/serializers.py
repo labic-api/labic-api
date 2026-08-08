@@ -166,7 +166,7 @@ class ProjetoSerializer(serializers.ModelSerializer):
     # Mapeamento: campo do front → campo do model
     title = serializers.CharField(source='titulo')
     area = serializers.CharField(source='area_pesquisa', required=False, allow_blank=True, allow_null=True)
-    startDate = NullableDateField(source='data_inicio', required=False, allow_null=True)
+    startDate = serializers.DateField(source='data_inicio', required=True, allow_null=False)
 
     class Meta:
         model = Projeto

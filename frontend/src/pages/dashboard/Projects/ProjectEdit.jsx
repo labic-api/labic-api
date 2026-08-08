@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Card from '../../../components/ui/Card'
 import Button from '../../../components/ui/Button'
 import Input from '../../../components/ui/Input'
@@ -7,9 +7,11 @@ import Alert from '../../../components/ui/Alert'
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
 import { projectsService } from '../../../services/projectsService'
 
-export default function ProjectCreate() {
+export default function ProjectEdit() {
   const navigate = useNavigate()
+  const { id } = useParams()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [alert, setAlert] = useState(null)
 
   const [formData, setFormData] = useState({
@@ -22,6 +24,27 @@ export default function ProjectCreate() {
   })
 
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    const loadProject = async () => {
+      try {
+        const data = await projectsService.getById(id)
+        setFormData({
+          titulo: data.title || '',
+          descricao: data.descricao || '',
+          responsavel: data.responsavel || '',
+          area: data.area || '',
+          data_inicio: data.startDate || '',
+          status: data.status || 'Ativo',
+        })
+      } catch (err) {
+        setAlert({ type: 'error', message: 'Erro ao carregar dados do projeto.' })
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+    loadProject()
+  }, [id])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -76,9 +99,9 @@ export default function ProjectCreate() {
         status: formData.status
       };
 
-      await projectsService.create(projectData);
+      await projectsService.update(id, projectData);
       
-      setAlert({ type: 'success', message: 'Projeto cadastrado com sucesso!' })
+      setAlert({ type: 'success', message: 'Projeto atualizado com sucesso!' })
       setTimeout(() => {
         setAlert(null)
         navigate('/dashboard/projetos')
@@ -94,11 +117,16 @@ export default function ProjectCreate() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
       <div style={{ width: '100%', maxWidth: '720px' }}>
-        <Card title="Cadastro de Projeto">
+        <Card title="Edição de Projeto">
           <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '15px', color: '#555555', margin: '0 0 24px 0' }}>
-            Preencha os campos abaixo para cadastrar um novo projeto de pesquisa.
+            Atualize os campos abaixo para editar o projeto de pesquisa.
           </p>
 
+          {initialLoading ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <p style={{ fontFamily: 'Open Sans, sans-serif', fontSize: '16px', color: '#555555' }}>Carregando dados...</p>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} noValidate>
             {/* Título */}
             <div>
@@ -226,10 +254,11 @@ export default function ProjectCreate() {
                 type="submit"
                 loading={loading}
               >
-                {loading ? 'Salvando...' : 'Salvar Projeto'}
+                {loading ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </div>
           </form>
+          )}
         </Card>
       </div>
     </div>

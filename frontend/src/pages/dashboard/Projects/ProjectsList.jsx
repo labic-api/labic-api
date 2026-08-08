@@ -138,7 +138,11 @@ export default function ProjectsList() {
                         <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} title="Visualizar">
                           <FiEye size={16} color="#4B5563" />
                         </button>
-                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} title="Editar">
+                        <button 
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} 
+                          title="Editar"
+                          onClick={() => navigate(`/dashboard/projetos/editar/${project.id}`)}
+                        >
                           <FiEdit2 size={16} color="#2B5DFA" />
                         </button>
                         <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px' }} title="Excluir" onClick={() => handleDelete(project.id)}>

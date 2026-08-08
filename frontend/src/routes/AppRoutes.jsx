@@ -21,14 +21,17 @@ import Dashboard from '../pages/dashboard/Dashboard'
 // RESEARCHERS
 import ResearchersList from '../pages/dashboard/Researchers/ResearchersList'
 import ResearcherCreate from '../pages/dashboard/Researchers/ResearcherCreate'
+import ResearcherEdit from '../pages/dashboard/Researchers/ResearcherEdit'
 
 // PROJECTS
 import ProjectsList from '../pages/dashboard/Projects/ProjectsList'
 import ProjectCreate from '../pages/dashboard/Projects/ProjectCreate'
+import ProjectEdit from '../pages/dashboard/Projects/ProjectEdit'
 
 // ARTICLES
 import ArticlesList from '../pages/dashboard/Articles/ArticlesList'
 import ArticleCreate from '../pages/dashboard/Articles/ArticleCreate'
+import ArticleEdit from '../pages/dashboard/Articles/ArticleEdit'
 
 /**
  * Guarda de rota privada.
@@ -67,10 +70,13 @@ function AppRoutes() {
           <Route index element={<Dashboard />} />
           <Route path="pesquisadores" element={<ResearchersList />} />
           <Route path="pesquisadores/novo" element={<ResearcherCreate />} />
+          <Route path="pesquisadores/editar/:id" element={<ResearcherEdit />} />
           <Route path="projetos" element={<ProjectsList />} />
           <Route path="projetos/novo" element={<ProjectCreate />} />
+          <Route path="projetos/editar/:id" element={<ProjectEdit />} />
           <Route path="artigos" element={<ArticlesList />} />
           <Route path="artigos/novo" element={<ArticleCreate />} />
+          <Route path="artigos/editar/:id" element={<ArticleEdit />} />
         </Route>
 
       </Routes>

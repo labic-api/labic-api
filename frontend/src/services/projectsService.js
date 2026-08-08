@@ -44,6 +44,27 @@ export const projectsService = {
     return response.json()
   },
 
+  /** GET /projetos/{id}/ — Busca um projeto específico */
+  getById: async (id) => {
+    const response = await apiFetch(`/projetos/${id}/`)
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao buscar o projeto.')
+    }
+    return response.json()
+  },
+
+  /** PUT /projetos/{id}/ — Atualiza um projeto */
+  update: async (id, data) => {
+    const response = await apiFetch(`/projetos/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw await parseError(response, 'Erro ao atualizar projeto.')
+    }
+    return response.json()
+  },
+
   /** DELETE /projetos/{id}/ — Remove um projeto pelo ID */
   delete: async (id) => {
     const response = await apiFetch(`/projetos/${id}/`, {
