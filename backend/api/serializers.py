@@ -38,6 +38,12 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
             )
 
         refresh = RefreshToken.for_user(user)
+        
+        # Adiciona claims customizadas ao token
+        refresh['email'] = user.email
+        refresh['first_name'] = user.first_name
+        refresh['last_name'] = user.last_name
+
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -161,12 +167,13 @@ class PesquisadorCreateSerializer(serializers.Serializer):
 class ProjetoSerializer(serializers.ModelSerializer):
     # Mapeamento: campo do front → campo do model
     title = serializers.CharField(source='titulo')
+    area = serializers.CharField(source='area_pesquisa', required=False, allow_blank=True, allow_null=True)
     startDate = NullableDateField(source='data_inicio', required=False, allow_null=True)
     endDate = NullableDateField(source='data_fim', required=False, allow_null=True)
 
     class Meta:
         model = Projeto
-        fields = ['id', 'title', 'status', 'startDate', 'endDate']
+        fields = ['id', 'title', 'descricao', 'responsavel', 'area', 'status', 'startDate', 'endDate']
 
     def validate_title(self, value):
         if not value or not value.strip():
