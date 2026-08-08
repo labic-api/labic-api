@@ -17,6 +17,7 @@ export default function ProjectCreate() {
     descricao: '',
     responsavel: '',
     area: '',
+    data_inicio: '',
     status: 'Ativo',
   })
 
@@ -68,6 +69,7 @@ export default function ProjectCreate() {
         descricao: formData.descricao,
         responsavel: formData.responsavel,
         area: formData.area,
+        startDate: formData.data_inicio,
         status: formData.status
       };
 
@@ -184,6 +186,17 @@ export default function ProjectCreate() {
                 <option value="Em Execução">Em Execução</option>
                 <option value="Concluído">Concluído</option>
               </select>
+            </div>
+
+            {/* Data de Início */}
+            <div>
+              <Input
+                label="Data de Início"
+                name="data_inicio"
+                type="date"
+                value={formData.data_inicio}
+                onChange={handleChange}
+              />
             </div>
 
             {/* ALERT */}

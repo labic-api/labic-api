@@ -38,11 +38,9 @@ class Projeto(models.Model):
 
     titulo = models.CharField(max_length=255)
     descricao = models.TextField(blank=True, default='')
-    metodologia = models.TextField(blank=True, default='')
     area_pesquisa = models.CharField(max_length=255, blank=True, null=True)
     responsavel = models.CharField(max_length=255, blank=True, null=True)
     data_inicio = models.DateField(blank=True, null=True)
-    data_fim = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Em Planejamento')
     equipe = models.ManyToManyField(User, related_name='projetos', blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)

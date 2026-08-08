@@ -107,11 +107,7 @@ class PesquisadorCreateSerializer(serializers.Serializer):
     """Cria User + PesquisadorProfile a partir dos campos do front."""
     name = serializers.CharField(max_length=255)
     email = serializers.EmailField()
-    # Senha opcional: se não enviada, usa o padrão abaixo
-    password = serializers.CharField(
-        write_only=True, min_length=6,
-        required=False, default='Labic@2026!'
-    )
+    # Senha removida para impedir login de pesquisador
     area = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
     link = serializers.URLField(required=False, allow_blank=True, allow_null=True, default=None)
     bio = serializers.CharField(required=False, allow_blank=True, default='')
@@ -141,14 +137,16 @@ class PesquisadorCreateSerializer(serializers.Serializer):
         # admin no model → is_staff=True no Django para funcionar com exigir_admin_para_escrita
         is_staff = (nivel_acesso == 'admin')
 
-        user = User.objects.create_user(
+        user = User(
             username=email,
             email=email,
-            password=password,
             first_name=first_name,
             last_name=last_name,
             is_staff=is_staff,
         )
+        user.set_unusable_password()
+        user.save()
+        
         profile = PesquisadorProfile.objects.create(
             user=user,
             area_atuacao=area or None,
@@ -169,11 +167,10 @@ class ProjetoSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='titulo')
     area = serializers.CharField(source='area_pesquisa', required=False, allow_blank=True, allow_null=True)
     startDate = NullableDateField(source='data_inicio', required=False, allow_null=True)
-    endDate = NullableDateField(source='data_fim', required=False, allow_null=True)
 
     class Meta:
         model = Projeto
-        fields = ['id', 'title', 'descricao', 'responsavel', 'area', 'status', 'startDate', 'endDate']
+        fields = ['id', 'title', 'descricao', 'responsavel', 'area', 'status', 'startDate']
 
     def validate_title(self, value):
         if not value or not value.strip():
